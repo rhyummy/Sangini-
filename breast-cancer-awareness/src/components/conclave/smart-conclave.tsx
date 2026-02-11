@@ -18,7 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchPosts, createPost } from "@/lib/supabase-data";
+import { getPosts, createPost } from "@/services/dataService";
 import { useAuth } from "@/lib/auth-context";
 import { ForumPost } from "@/types";
 
@@ -126,12 +126,12 @@ export function SmartConclave() {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch posts from Supabase on mount
+  // Fetch posts from dataService on mount
   useEffect(() => {
     async function loadPosts() {
       try {
         setLoading(true);
-        const data = await fetchPosts();
+        const data = await getPosts();
         setPosts(data);
       } catch (err) {
         console.error('Error loading posts:', err);
@@ -146,15 +146,13 @@ export function SmartConclave() {
     e.preventDefault();
     if (!question.trim()) return;
 
-    // Try to create post in Supabase
+    // Try to create post via dataService
     if (user?.id) {
       try {
         const newPost = await createPost({
           userId: user.id,
           title: question.length > 50 ? question.substring(0, 50) + '...' : question,
           content: question,
-          topic: 'General',
-          isAnonymous: false,
         });
         if (newPost) {
           setPosts(prev => [newPost, ...prev]);

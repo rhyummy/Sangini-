@@ -6,14 +6,13 @@ import { useAuth } from '@/lib/auth-context';
 import { MeetingScheduler } from '@/components/ui/meeting-scheduler';
 import { LiquidButton, GlassButton } from '@/components/ui/liquid-glass-button';
 import { Calendar, CheckCircle2, Loader2 } from 'lucide-react';
-import { 
-  fetchAppointments, 
-  fetchUsersByRole, 
-  bookAppointment, 
+import {
+  getAppointments,
+  getUsersByRole,
+  createAppointment,
   updateAppointmentStatus,
-  fetchDoctorAvailability 
-} from '@/lib/supabase-data';
-import { mockAppointments, getDoctorAvailability } from '@/lib/mock-data';
+  getDoctorAvailability,
+} from '@/services/dataService';
 
 export default function AppointmentsPage() {
   const { user } = useAuth();
@@ -23,21 +22,19 @@ export default function AppointmentsPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Fetch appointments and doctors on mount
+  // Fetch appointments and doctors via dataService
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         const [appointmentsData, doctorsData] = await Promise.all([
-          fetchAppointments(),
-          fetchUsersByRole('doctor'),
+          getAppointments(),
+          getUsersByRole('doctor'),
         ]);
         setAppointments(appointmentsData);
         setDoctors(doctorsData);
       } catch (err) {
         console.error('Error loading appointments:', err);
-        // Fallback to mock data
-        setAppointments(mockAppointments);
       } finally {
         setLoading(false);
       }
@@ -55,19 +52,19 @@ export default function AppointmentsPage() {
     let hour = parseInt(hours);
     if (data.time.includes('PM') && hour !== 12) hour += 12;
     if (data.time.includes('AM') && hour === 12) hour = 0;
-    
+
     const appointmentDate = new Date(`${data.date}T${hour.toString().padStart(2, '0')}:${minutes || '00'}:00`);
 
-    // Try to book via Supabase
-    const newApt = await bookAppointment({
+    // Create appointment via dataService
+    const newApt = await createAppointment({
       patientId: user?.id || 'guest',
       doctorId: data.doctorId,
       appointmentDate: appointmentDate.toISOString(),
-      reason: data.reason,
     });
 
     if (newApt) {
-      setAppointments(prev => [...prev, newApt]);
+      // Add reason locally since DB doesn't have it
+      setAppointments(prev => [...prev, { ...newApt, reason: data.reason }]);
     } else {
       // Fallback: create local appointment
       const doctor = doctors.find(d => d.id === data.doctorId);
@@ -94,25 +91,15 @@ export default function AppointmentsPage() {
 
   async function handleCancel(appointmentId: string) {
     const success = await updateAppointmentStatus(appointmentId, 'cancelled');
-    if (success) {
-      setAppointments(prev =>
-        prev.map(a => a.id === appointmentId ? { ...a, status: 'cancelled' } : a)
-      );
-    } else {
-      // Fallback: update locally
-      setAppointments(prev =>
-        prev.map(a => a.id === appointmentId ? { ...a, status: 'cancelled' } : a)
-      );
-    }
+    // Always update locally (dataService handles DB update)
+    setAppointments(prev =>
+      prev.map(a => a.id === appointmentId ? { ...a, status: 'cancelled' } : a)
+    );
   }
 
-  // Availability function that tries Supabase first, falls back to mock
+  // Availability via dataService (Supabase → mock fallback)
   async function getAvailability(doctorId: string, date: string) {
-    try {
-      return await fetchDoctorAvailability(doctorId, date);
-    } catch {
-      return getDoctorAvailability(doctorId, date);
-    }
+    return getDoctorAvailability(doctorId, date);
   }
 
   if (loading) {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { fetchPatientSummaries } from '@/lib/supabase-data';
+import { getPatientSummaries } from '@/services/dataService';
 import { PatientSummary } from '@/types';
 
 export default function DoctorDashboard() {
@@ -12,12 +12,12 @@ export default function DoctorDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch patient summaries from Supabase on mount
+  // Fetch patient summaries via dataService (Supabase → mock fallback)
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
-        const data = await fetchPatientSummaries();
+        const data = await getPatientSummaries();
         setSummaries(data);
       } catch (err) {
         console.error('Error loading patient summaries:', err);

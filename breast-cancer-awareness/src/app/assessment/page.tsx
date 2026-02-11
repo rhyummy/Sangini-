@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { riskFactorQuestions, symptomQuestions, calculateRiskScore } from '@/lib/scoring-engine';
 import { Question } from '@/types';
 import { useAuth } from '@/lib/auth-context';
-import { submitAssessment as submitToSupabase } from '@/lib/supabase-data';
+import { createAssessment } from '@/services/dataService';
 
 type Phase = 'consent' | 'risk_factors' | 'symptoms' | 'calculating';
 
@@ -77,10 +77,10 @@ export default function AssessmentPage() {
       timestamp: new Date().toISOString(),
     };
 
-    // Try to save to Supabase
+    // Try to save assessment via dataService
     if (user?.id) {
       try {
-        await submitToSupabase({
+        await createAssessment({
           userId: user.id,
           riskScore: result.totalScore,
           riskLevel: result.riskLevel,
@@ -91,7 +91,7 @@ export default function AssessmentPage() {
             recommendations: result.recommendations,
           },
         });
-        console.log('Assessment saved to Supabase');
+        console.log('Assessment saved successfully');
       } catch (err) {
         console.error('Failed to save to Supabase, storing locally:', err);
       }

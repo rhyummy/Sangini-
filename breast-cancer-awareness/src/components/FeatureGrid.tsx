@@ -23,7 +23,7 @@ const features: FeatureItem[] = [
     icon: <ClipboardCheck className="size-6 text-pink-600" />,
     title: "Self Assessment",
     description:
-      "Answer a short questionnaire about risk factors and symptoms. Get an instant, explainable risk score with clear next steps.",
+      "Quick questions. Zero judgement. Smart insights. Get an instant, explainable risk score with clear next steps.",
     href: "/assessment",
     area: "md:[grid-area:1/1/2/7]",
   },
@@ -31,7 +31,7 @@ const features: FeatureItem[] = [
     icon: <Stethoscope className="size-6 text-pink-600" />,
     title: "Doctor Smart Assist",
     description:
-      "Doctors see AI-generated patient summaries, risk explanations, and suggested next actions — reducing workload while keeping humans in the loop.",
+      "Doctors see AI-generated patient summaries, risk explanations, and suggested next actions. Keeps humans in the loop.",
     href: "/dashboard",
     area: "md:[grid-area:1/7/2/13]",
   },
@@ -39,7 +39,7 @@ const features: FeatureItem[] = [
     icon: <CalendarDays className="size-6 text-pink-600" />,
     title: "Appointments",
     description:
-      "Book doctor consultations with a simple calendar flow. View availability and manage your appointments.",
+      "Book doctor consultations with a simple calendar flow. Book it. Move it. No awkward calls.",
     href: "/appointments",
     area: "md:[grid-area:2/1/3/5]",
   },
@@ -47,7 +47,7 @@ const features: FeatureItem[] = [
     icon: <MessageCircleHeart className="size-6 text-pink-600" />,
     title: "Support Chatbot",
     description:
-      "Get emotional support, understand medical terms, and find your next steps. No diagnosis — just compassionate guidance.",
+      "Get emotional support, understand medical terms, and find your next steps.",
     href: "/chat",
     area: "md:[grid-area:2/5/3/9]",
   },
@@ -55,7 +55,7 @@ const features: FeatureItem[] = [
     icon: <Users className="size-6 text-pink-600" />,
     title: "Smart Conclave",
     description:
-      "Topic-based community discussions. Patients, survivors, caregivers, and NGOs sharing support — with anonymous posting.",
+      "Real stories. Safe space. You’re not alone. Post anonymously and connect with others.",
     href: "/conclave",
     area: "md:[grid-area:2/9/3/13]",
   },
