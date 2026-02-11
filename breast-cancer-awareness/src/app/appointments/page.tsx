@@ -12,7 +12,7 @@ import {
   bookAppointment, 
   updateAppointmentStatus,
   fetchDoctorAvailability 
-} from '@/lib/supabase-data'; hhhhhhhhh
+} from '@/lib/supabase-data';
 import { mockAppointments, getDoctorAvailability } from '@/lib/mock-data';
 
 export default function AppointmentsPage() {
