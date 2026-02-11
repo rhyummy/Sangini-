@@ -74,8 +74,8 @@ const data: Gallery4Item[] = [
 ];
 
 const Gallery4 = ({
-  title = "How BreastGuard Helps",
-  description = "BreastGuard helps you understand your breast cancer risk through a simple, explainable self-assessment — and connects you with doctors, support, and community.",
+  title = "How Sangini Helps",
+  description = "Sangini helps you assess breast cancer risk through simple, explainable AI, and connects you to care, support, and community.",
   items = data,
 }: Gallery4Props) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();

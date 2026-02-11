@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useEffect, useRef, useState } from 'react';
 import LandingHero from '@/components/LandingHero';
-import { Gallery4 } from '@/components/Gallery4';
+import { FeatureGrid } from '@/components/FeatureGrid';
+import { CTASection } from '@/components/ui/cta-section';
+import { Glow, CursorGlow } from '@/components/ui/glow';
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -39,18 +41,33 @@ export default function HomePage() {
       {/* Spacer to enable scrolling past the hero */}
       <div className="h-screen" />
 
+      {/* Cursor-following glow */}
+      <CursorGlow />
+
       {/* Main content */}
-      <div ref={mainRef}>
+      <div ref={mainRef} className="relative min-h-screen w-full bg-white">
+        {/* Soft Pink Glow Background */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at center, #fbcfe8 0%, transparent 70%)`,
+            opacity: 0.5,
+            mixBlendMode: 'multiply',
+          }}
+        />
+        {/* Static Glow accents */}
+        <Glow variant="top" className="z-0 opacity-40" />
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 py-20 px-4">
+      <section className="relative z-10 py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <div className="text-6xl mb-6">🎗️</div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Early Awareness <span className="text-pink-600">Saves Lives</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-            BreastGuard helps you understand your breast cancer risk through a simple,
-            explainable self-assessment — and connects you with doctors, support, and community.
+            Sangini helps you assess breast cancer risk through simple, explainable AI,
+            and connects you to care, support, and community.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -75,11 +92,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Carousel */}
-      <Gallery4 />
+      {/* Features Grid with Glowing Effect */}
+      <FeatureGrid />
+
+      {/* CTA Section */}
+      <CTASection
+        title="Ready to take the first step?"
+        action={{ text: "Start Self-Assessment", href: "/assessment" }}
+      />
 
       {/* How It Works */}
-      <section className="py-16 px-4 bg-white">
+      <section className="relative z-10 py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             How It <span className="text-pink-600">Works</span>
@@ -95,7 +118,7 @@ export default function HomePage() {
 
       {/* Quick Demo Login */}
       {!user && (
-        <section className="py-16 px-4 bg-gradient-to-r from-pink-50 to-fuchsia-50">
+        <section className="relative z-10 py-16 px-4">
           <div className="max-w-xl mx-auto text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Try the Demo</h2>
             <p className="text-gray-600 mb-6">

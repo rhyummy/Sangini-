@@ -21,6 +21,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
+:root {
+  --brand: 330 80% 60%;
+  --brand-foreground: 340 90% 75%;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);
@@ -35,3 +40,41 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-track { background: #fce7f3; }
 ::-webkit-scrollbar-thumb { background: #f9a8d4; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+
+/* Glowing effect */
+.glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.glow::before,
+.glow::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--glowingeffect-border-width));
+  border: var(--glowingeffect-border-width) solid transparent;
+  border-radius: inherit;
+  background: var(--gradient);
+  background-attachment: fixed;
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+}
+
+.glow::before {
+  opacity: 0.4;
+  mask-image: none;
+}
+
+.glow::after {
+  opacity: var(--active);
+  transition: opacity 0.3s;
+  mask-image: linear-gradient(#0000, #0000),
+    conic-gradient(
+      from calc((var(--start) - var(--spread)) * 1deg),
+      #00000000 0deg,
+      #fff,
+      #00000000 calc(var(--spread) * 2deg)
+    );
+}
