@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { LiquidButton, GlassButton } from "@/components/ui/liquid-glass-button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 interface TimeSlot {
   time: string;
@@ -18,7 +18,7 @@ interface MeetingSchedulerProps {
     time: string;
     reason: string;
   }) => void;
-  getAvailability: (doctorId: string, date: string) => TimeSlot[];
+  getAvailability: (doctorId: string, date: string) => TimeSlot[] | Promise<TimeSlot[]>;
   className?: string;
 }
 
@@ -33,6 +33,8 @@ export function MeetingScheduler({
   const [selectedTime, setSelectedTime] = useState("");
   const [reason, setReason] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -40,10 +42,30 @@ export function MeetingScheduler({
     return d;
   }, []);
 
-  const slots = useMemo(() => {
-    if (!selectedDoctor || !selectedDate) return [];
+  // Fetch availability (supports both sync and async)
+  useEffect(() => {
+    if (!selectedDoctor || !selectedDate) {
+      setSlots([]);
+      return;
+    }
+
     const dateStr = selectedDate.toISOString().split("T")[0];
-    return getAvailability(selectedDoctor, dateStr);
+    setLoadingSlots(true);
+    
+    const result = getAvailability(selectedDoctor, dateStr);
+    
+    if (result instanceof Promise) {
+      result.then(data => {
+        setSlots(data);
+        setLoadingSlots(false);
+      }).catch(() => {
+        setSlots([]);
+        setLoadingSlots(false);
+      });
+    } else {
+      setSlots(result);
+      setLoadingSlots(false);
+    }
   }, [selectedDoctor, selectedDate, getAvailability]);
 
   const calendar = useMemo(() => {
@@ -190,7 +212,13 @@ export function MeetingScheduler({
         </div>
 
         {/* Time Slots */}
-        {slots.length > 0 && (
+        {loadingSlots && selectedDate && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-pink-500 mr-2" />
+            <span className="text-sm text-pink-600">Loading available times...</span>
+          </div>
+        )}
+        {!loadingSlots && slots.length > 0 && (
           <div>
             <label className="block text-sm font-medium text-pink-900 mb-2">
               Available Times

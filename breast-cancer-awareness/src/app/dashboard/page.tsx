@@ -1,15 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { getPatientSummaries } from '@/lib/mock-data';
+import { fetchPatientSummaries } from '@/lib/supabase-data';
 import { PatientSummary } from '@/types';
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
   const [selectedPatient, setSelectedPatient] = useState<PatientSummary | null>(null);
+  const [summaries, setSummaries] = useState<PatientSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const summaries = getPatientSummaries();
+  // Fetch patient summaries from Supabase on mount
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        const data = await fetchPatientSummaries();
+        setSummaries(data);
+      } catch (err) {
+        console.error('Error loading patient summaries:', err);
+        setError('Failed to load patient data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user?.role === 'doctor') {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   if (!user || user.role !== 'doctor') {
     return (
@@ -17,6 +40,25 @@ export default function DoctorDashboard() {
         <div className="text-5xl mb-4">🔒</div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Doctor Access Only</h2>
         <p className="text-gray-500">Please log in as a doctor to access this dashboard. Use the Demo Login button in the navbar.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-24 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+        <p className="text-gray-500">Loading patient data from database...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-24 text-center">
+        <div className="text-5xl mb-4">⚠️</div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Data</h2>
+        <p className="text-gray-500">{error}</p>
       </div>
     );
   }

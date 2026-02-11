@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { riskFactorQuestions, symptomQuestions, calculateRiskScore } from '@/lib/scoring-engine';
 import { Question } from '@/types';
+import { useAuth } from '@/lib/auth-context';
+import { submitAssessment as submitToSupabase } from '@/lib/supabase-data';
 
 type Phase = 'consent' | 'risk_factors' | 'symptoms' | 'calculating';
 
 export default function AssessmentPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>('consent');
   const [currentIdx, setCurrentIdx] = useState(0);
   const [riskAnswers, setRiskAnswers] = useState<Record<string, number>>({});
@@ -50,7 +53,7 @@ export default function AssessmentPage() {
     }
   }
 
-  function submitAssessment() {
+  async function submitAssessment() {
     setPhase('calculating');
 
     const rfAnswers = Object.entries(riskAnswers).map(([questionId, value]) => ({
@@ -66,13 +69,35 @@ export default function AssessmentPage() {
 
     const result = calculateRiskScore(rfAnswers, sxAnswers);
 
-    // Store in localStorage for results page
+    // Prepare full result
     const fullResult = {
       ...result,
       id: 'asr_' + Date.now(),
-      userId: 'current_user',
+      userId: user?.id || 'anonymous',
       timestamp: new Date().toISOString(),
     };
+
+    // Try to save to Supabase
+    if (user?.id) {
+      try {
+        await submitToSupabase({
+          userId: user.id,
+          riskScore: result.totalScore,
+          riskLevel: result.riskLevel,
+          riskBreakdown: {
+            riskFactorScore: result.riskFactorScore,
+            symptomScore: result.symptomScore,
+            explanations: result.explanations,
+            recommendations: result.recommendations,
+          },
+        });
+        console.log('Assessment saved to Supabase');
+      } catch (err) {
+        console.error('Failed to save to Supabase, storing locally:', err);
+      }
+    }
+
+    // Always store in localStorage for results page
     localStorage.setItem('bca_latest_result', JSON.stringify(fullResult));
 
     setTimeout(() => {

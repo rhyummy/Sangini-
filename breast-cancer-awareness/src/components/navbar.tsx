@@ -36,26 +36,34 @@ export function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="relative">
-              <button
-                onClick={() => setDemoOpen(!demoOpen)}
-                className="bg-pink-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-pink-700 transition-colors"
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login"
+                className="text-sm text-pink-600 hover:text-pink-700 font-medium transition-colors"
               >
-                Demo Login ▾
-              </button>
-              {demoOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-pink-100 py-2 z-50">
-                  {(['patient', 'doctor', 'volunteer', 'admin'] as const).map(role => (
-                    <button
-                      key={role}
-                      onClick={() => { loginAs(role); setDemoOpen(false); }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 capitalize"
-                    >
-                      Login as {role}
-                    </button>
-                  ))}
-                </div>
-              )}
+                Login
+              </Link>
+              <div className="relative">
+                <button
+                  onClick={() => setDemoOpen(!demoOpen)}
+                  className="bg-pink-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-pink-700 transition-colors"
+                >
+                  Demo ▾
+                </button>
+                {demoOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-pink-100 py-2 z-50">
+                    {(['patient', 'doctor', 'volunteer', 'admin'] as const).map(role => (
+                      <button
+                        key={role}
+                        onClick={() => { loginAs(role); setDemoOpen(false); }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 capitalize"
+                      >
+                        Login as {role}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -85,7 +93,10 @@ export function Navbar() {
             <button onClick={() => { logout(); setMenuOpen(false); }} className="block w-full text-left py-2 text-red-500">Logout ({user.name})</button>
           ) : (
             <div className="space-y-1 pt-2 border-t border-pink-50">
-              <p className="text-xs text-gray-400 font-medium">Demo Login:</p>
+              <Link href="/login" className="block py-2 text-pink-600 font-medium" onClick={() => setMenuOpen(false)}>
+                Login / Sign Up
+              </Link>
+              <p className="text-xs text-gray-400 font-medium">Quick Demo:</p>
               {(['patient', 'doctor', 'volunteer', 'admin'] as const).map(role => (
                 <button key={role} onClick={() => { loginAs(role); setMenuOpen(false); }} className="block w-full text-left py-1.5 text-sm text-gray-700 hover:text-pink-600 capitalize">
                   {role}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,8 +15,12 @@ import {
   UserCircle,
   Stethoscope,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fetchPosts, createPost } from "@/lib/supabase-data";
+import { useAuth } from "@/lib/auth-context";
+import { ForumPost } from "@/types";
 
 interface CommunitySpace {
   id: string;
@@ -71,48 +75,7 @@ const communitySpaces: CommunitySpace[] = [
   },
 ];
 
-const trendingTopics: Topic[] = [
-  {
-    id: "1",
-    title: "How to prepare for your first mammogram screening?",
-    author: "Dr. Sarah Chen",
-    replies: 42,
-    likes: 89,
-    timestamp: "2h ago",
-  },
-  {
-    id: "2",
-    title: "Coping strategies during treatment: What worked for you?",
-    author: "Maya R.",
-    replies: 67,
-    likes: 134,
-    timestamp: "5h ago",
-  },
-  {
-    id: "3",
-    title: "Understanding BRCA gene testing results",
-    author: "Dr. Priya Sharma",
-    replies: 28,
-    likes: 56,
-    timestamp: "8h ago",
-  },
-  {
-    id: "4",
-    title: "Self-care tips for caregivers and family members",
-    author: "Lisa M.",
-    replies: 51,
-    likes: 102,
-    timestamp: "1d ago",
-  },
-  {
-    id: "5",
-    title: "Nutrition advice during recovery: Evidence-based guide",
-    author: "Dr. Ankit Kumar",
-    replies: 39,
-    likes: 78,
-    timestamp: "2d ago",
-  },
-];
+// trendingTopics is now generated dynamically from Supabase posts
 
 const topContributors: Contributor[] = [
   {
@@ -141,13 +104,65 @@ const topContributors: Contributor[] = [
   },
 ];
 
+// Helper function for relative time
+function getRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffHours < 1) return 'just now';
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return '1d ago';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
 export function SmartConclave() {
+  const { user } = useAuth();
   const [question, setQuestion] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Fetch posts from Supabase on mount
+  useEffect(() => {
+    async function loadPosts() {
+      try {
+        setLoading(true);
+        const data = await fetchPosts();
+        setPosts(data);
+      } catch (err) {
+        console.error('Error loading posts:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPosts();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim()) return;
+
+    // Try to create post in Supabase
+    if (user?.id) {
+      try {
+        const newPost = await createPost({
+          userId: user.id,
+          title: question.length > 50 ? question.substring(0, 50) + '...' : question,
+          content: question,
+          topic: 'General',
+          isAnonymous: false,
+        });
+        if (newPost) {
+          setPosts(prev => [newPost, ...prev]);
+        }
+      } catch (err) {
+        console.error('Error creating post:', err);
+      }
+    }
 
     setShowSuccess(true);
     setQuestion("");
@@ -156,6 +171,16 @@ export function SmartConclave() {
       setShowSuccess(false);
     }, 3000);
   };
+
+  // Convert posts to trending topics format
+  const trendingTopics = posts.slice(0, 5).map(post => ({
+    id: post.id,
+    title: post.title,
+    author: post.authorName,
+    replies: post.replies?.length || 0,
+    likes: Math.floor(Math.random() * 100) + 10, // Mock likes since not in schema
+    timestamp: getRelativeTime(post.createdAt),
+  }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -257,6 +282,17 @@ export function SmartConclave() {
           </h2>
           <Card className="shadow-lg">
             <CardContent className="p-0">
+              {loading ? (
+                <div className="p-8 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-pink-500 mx-auto mb-2" />
+                  <p className="text-pink-600">Loading discussions...</p>
+                </div>
+              ) : trendingTopics.length === 0 ? (
+                <div className="p-8 text-center text-pink-500">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No discussions yet. Be the first to start one!</p>
+                </div>
+              ) : (
               <div className="divide-y divide-pink-100">
                 {trendingTopics.map((topic) => (
                   <div
@@ -283,6 +319,7 @@ export function SmartConclave() {
                   </div>
                 ))}
               </div>
+              )}
             </CardContent>
           </Card>
         </div>

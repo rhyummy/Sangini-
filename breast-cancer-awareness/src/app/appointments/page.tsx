@@ -1,45 +1,127 @@
 'use client';
 
-import { useState } from 'react';
-import { mockUsers, mockAppointments, getDoctorAvailability } from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
 import { Appointment } from '@/types';
 import { useAuth } from '@/lib/auth-context';
 import { MeetingScheduler } from '@/components/ui/meeting-scheduler';
 import { LiquidButton, GlassButton } from '@/components/ui/liquid-glass-button';
-import { Calendar, CheckCircle2 } from 'lucide-react';
+import { Calendar, CheckCircle2, Loader2 } from 'lucide-react';
+import { 
+  fetchAppointments, 
+  fetchUsersByRole, 
+  bookAppointment, 
+  updateAppointmentStatus,
+  fetchDoctorAvailability 
+} from '@/lib/supabase-data'; hhhhhhhhh
+import { mockAppointments, getDoctorAvailability } from '@/lib/mock-data';
 
 export default function AppointmentsPage() {
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [doctors, setDoctors] = useState<{ id: string; name: string; email: string; role: string; createdAt: string }[]>([]);
   const [showBooking, setShowBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const doctors = mockUsers.filter(u => u.role === 'doctor');
+  // Fetch appointments and doctors on mount
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [appointmentsData, doctorsData] = await Promise.all([
+          fetchAppointments(),
+          fetchUsersByRole('doctor'),
+        ]);
+        setAppointments(appointmentsData);
+        setDoctors(doctorsData);
+      } catch (err) {
+        console.error('Error loading appointments:', err);
+        // Fallback to mock data
+        setAppointments(mockAppointments);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const myAppointments = user
     ? appointments.filter(a => a.patientId === user.id || a.doctorId === user.id)
     : appointments;
 
-  function handleBook(data: { doctorId: string; date: string; time: string; reason: string }) {
-    const doctor = doctors.find(d => d.id === data.doctorId);
-    const newApt: Appointment = {
-      id: 'apt_' + Date.now(),
-      patientId: user?.id || 'guest',
-      patientName: user?.name || 'Guest User',
-      doctorId: data.doctorId,
-      doctorName: doctor?.name || 'Unknown',
-      date: data.date,
-      time: data.time,
-      status: 'pending',
-      reason: data.reason,
-    };
+  async function handleBook(data: { doctorId: string; date: string; time: string; reason: string }) {
+    // Convert date and time to ISO string
+    const [hours, minutes] = data.time.replace(' AM', '').replace(' PM', '').split(':');
+    let hour = parseInt(hours);
+    if (data.time.includes('PM') && hour !== 12) hour += 12;
+    if (data.time.includes('AM') && hour === 12) hour = 0;
+    
+    const appointmentDate = new Date(`${data.date}T${hour.toString().padStart(2, '0')}:${minutes || '00'}:00`);
 
-    setAppointments(prev => [...prev, newApt]);
+    // Try to book via Supabase
+    const newApt = await bookAppointment({
+      patientId: user?.id || 'guest',
+      doctorId: data.doctorId,
+      appointmentDate: appointmentDate.toISOString(),
+      reason: data.reason,
+    });
+
+    if (newApt) {
+      setAppointments(prev => [...prev, newApt]);
+    } else {
+      // Fallback: create local appointment
+      const doctor = doctors.find(d => d.id === data.doctorId);
+      const localApt: Appointment = {
+        id: 'apt_' + Date.now(),
+        patientId: user?.id || 'guest',
+        patientName: user?.name || 'Guest User',
+        doctorId: data.doctorId,
+        doctorName: doctor?.name || 'Unknown',
+        date: data.date,
+        time: data.time,
+        status: 'pending',
+        reason: data.reason,
+      };
+      setAppointments(prev => [...prev, localApt]);
+    }
+
     setBookingSuccess(true);
     setTimeout(() => {
       setShowBooking(false);
       setBookingSuccess(false);
     }, 2500);
+  }
+
+  async function handleCancel(appointmentId: string) {
+    const success = await updateAppointmentStatus(appointmentId, 'cancelled');
+    if (success) {
+      setAppointments(prev =>
+        prev.map(a => a.id === appointmentId ? { ...a, status: 'cancelled' } : a)
+      );
+    } else {
+      // Fallback: update locally
+      setAppointments(prev =>
+        prev.map(a => a.id === appointmentId ? { ...a, status: 'cancelled' } : a)
+      );
+    }
+  }
+
+  // Availability function that tries Supabase first, falls back to mock
+  async function getAvailability(doctorId: string, date: string) {
+    try {
+      return await fetchDoctorAvailability(doctorId, date);
+    } catch {
+      return getDoctorAvailability(doctorId, date);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-24 text-center">
+        <Loader2 className="h-12 w-12 animate-spin text-pink-500 mx-auto mb-4" />
+        <p className="text-pink-600">Loading appointments...</p>
+      </div>
+    );
   }
 
   return (
@@ -70,7 +152,7 @@ export default function AppointmentsPage() {
             <MeetingScheduler
               doctors={doctors}
               onBook={handleBook}
-              getAvailability={getDoctorAvailability}
+              getAvailability={getAvailability}
             />
           )}
         </div>
@@ -113,11 +195,7 @@ export default function AppointmentsPage() {
                 {apt.status === 'pending' && (
                   <GlassButton
                     size="sm"
-                    onClick={() => {
-                      setAppointments(prev =>
-                        prev.map(a => a.id === apt.id ? { ...a, status: 'cancelled' } : a)
-                      );
-                    }}
+                    onClick={() => handleCancel(apt.id)}
                     className="text-rose-600"
                   >
                     Cancel
