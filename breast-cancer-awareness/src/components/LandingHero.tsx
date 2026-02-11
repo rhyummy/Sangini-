@@ -1,16 +1,13 @@
 "use client"
 
 import { Warp } from "@paper-design/shaders-react"
-import { FormEvent, useState } from "react"
+import { useState } from "react"
+import { useAuth } from "@/lib/auth-context"
+import { UserRole } from "@/types"
 
 export default function LandingHero() {
-  const [email, setEmail] = useState<string>("")
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault()
-    // Handle email submission
-    console.log("Email submitted:", email)
-  }
+  const { user, loginAs, logout } = useAuth()
+  const [demoOpen, setDemoOpen] = useState(false)
 
   return (
     <section className="relative h-screen overflow-hidden">
@@ -39,32 +36,54 @@ export default function LandingHero() {
 
       <div className="relative z-10 h-full flex items-center justify-center px-8">
         <div className="max-w-2xl w-full text-center space-y-8">
-          <h1 className="text-white text-6xl md:text-7xl font-light italic">
-            Empowering Women Through Early Detection
+          <h1 className="text-white text-7xl md:text-8xl font-bold tracking-tight">
+            Sangini
           </h1>
+          <p className="text-white/90 text-xl md:text-2xl font-light italic -mt-4">
+            Her Health. Her Strength.
+          </p>
 
-          <form onSubmit={handleSubmit} className="relative">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Get updates & early access"
-              className="w-full px-6 py-4 pr-20 text-lg bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
-              required
-              aria-label="Email address for updates"
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-              aria-label="Submit email"
-            >
-              →
-            </button>
-          </form>
+          {/* Authorization Component */}
+          <div className="flex flex-col items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full font-medium capitalize border border-white/30">
+                  {user.role}: {user.name}
+                </span>
+                <button
+                  onClick={logout}
+                  className="text-sm text-white/80 hover:text-white bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30 hover:bg-white/20 transition-all"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setDemoOpen(!demoOpen)}
+                  className="px-8 py-4 text-lg bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white font-medium hover:bg-white/30 transition-all focus:outline-none focus:ring-2 focus:ring-white/50"
+                >
+                  Sign In ▾
+                </button>
+                {demoOpen && (
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-56 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/50 py-3 z-50">
+                    {(['patient', 'doctor', 'volunteer', 'admin'] as const).map((role: UserRole) => (
+                      <button
+                        key={role}
+                        onClick={() => { loginAs(role); setDemoOpen(false); }}
+                        className="block w-full text-left px-5 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 capitalize transition-colors"
+                      >
+                        Continue as {role}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <p className="text-white/90 text-lg font-light">
-            AI-powered breast health awareness, screening guidance,
-            <br /> and support — built for women, doctors, and volunteers.
+            AI uniting care, diagnosis, support, and survival.
           </p>
 
           {/* Scroll hint */}

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useState } from 'react';
+import { StackingNavbar } from '@/components/ui/stacking-navbar';
 
 export function Navbar() {
   const { user, logout, loginAs } = useAuth();
@@ -15,18 +16,12 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-pink-600 hover:text-pink-700 transition-colors">
           <span className="text-2xl">🎗️</span>
-          <span>BreastGuard</span>
+          <span>Sangini</span>
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/assessment" className="text-gray-600 hover:text-pink-600 transition-colors">Self-Assessment</Link>
-          {user?.role === 'doctor' && (
-            <Link href="/dashboard" className="text-gray-600 hover:text-pink-600 transition-colors">Doctor Dashboard</Link>
-          )}
-          <Link href="/appointments" className="text-gray-600 hover:text-pink-600 transition-colors">Appointments</Link>
-          <Link href="/chat" className="text-gray-600 hover:text-pink-600 transition-colors">Support Chat</Link>
-          <Link href="/conclave" className="text-gray-600 hover:text-pink-600 transition-colors">Conclave</Link>
+        {/* Desktop links - Stacking Navbar */}
+        <div className="hidden md:flex items-center">
+          <StackingNavbar />
         </div>
 
         {/* Auth / Demo */}
