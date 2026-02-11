@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/rhyummy/Sangini-/issues"
   },
-  "homepage": "https://github.com/rhyummy/Sangini-#readme"
+  "homepage": "https://github.com/rhyummy/Sangini-#readme",
+  "dependencies": {
+    "@prisma/client": "^7.3.0",
+    "prisma": "^7.3.0"
+  }
 }

@@ -83,12 +83,6 @@ export default function HomePage() {
               Talk to Support Bot
             </Link>
           </div>
-
-          {/* Medical Disclaimer Banner */}
-          <div className="mt-10 max-w-2xl mx-auto bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            <strong>⚠️ Important:</strong> This platform is for <strong>awareness and education only</strong>.
-            It does not diagnose any medical condition. Always consult a qualified healthcare professional.
-          </div>
         </div>
       </section>
 
