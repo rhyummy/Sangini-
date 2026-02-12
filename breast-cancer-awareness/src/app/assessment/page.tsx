@@ -6,6 +6,7 @@ import { riskFactorQuestions, symptomQuestions, calculateRiskScore } from '@/lib
 import { Question } from '@/types';
 import { useAuth } from '@/lib/auth-context';
 import { createAssessment } from '@/services/dataService';
+import { ClipboardCheck, AlertTriangle, Info, Clock } from 'lucide-react';
 
 type Phase = 'consent' | 'risk_factors' | 'symptoms' | 'calculating';
 
@@ -108,54 +109,124 @@ export default function AssessmentPage() {
   // ---- Consent Screen ----
   if (phase === 'consent') {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Breast Cancer Risk Self-Assessment</h1>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 via-rose-50/30 to-white py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          
+          {/* Header Pill */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-pink-100">
+              <ClipboardCheck className="w-4 h-4 text-pink-600" />
+              <span className="text-sm font-medium text-gray-700">Self-Assessment</span>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-3">
+            Breast Cancer Risk Assessment
+          </h1>
+          
+          {/* Subtext */}
+          <p className="text-center text-gray-600 mb-10 max-w-xl mx-auto">
             This questionnaire helps you understand your risk level based on known risk factors
             and self-reported symptoms from breast self-examination (BSE).
           </p>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
-            <strong>⚠️ Medical Disclaimer</strong>
-            <ul className="mt-2 space-y-1 list-disc list-inside">
-              <li>This is <strong>NOT</strong> a medical diagnosis tool.</li>
-              <li>Results are for awareness and education only.</li>
-              <li>This uses rule-based scoring, not clinical-grade AI.</li>
-              <li>Always consult a qualified healthcare professional.</li>
-              <li>Your responses are stored locally on your device only.</li>
-            </ul>
+          {/* Medical Disclaimer Card */}
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 shadow-sm">
+            <div className="flex gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-amber-900 mb-3">Medical Disclaimer</h3>
+                <ul className="space-y-2 text-sm text-amber-800">
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-0.5">•</span>
+                    <span>This is <strong>NOT</strong> a medical diagnosis tool.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-0.5">•</span>
+                    <span>Results are for awareness and education only.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-0.5">•</span>
+                    <span>This uses rule-based scoring, not clinical-grade AI.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-0.5">•</span>
+                    <span>Always consult a qualified healthcare professional.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-600 mt-0.5">•</span>
+                    <span>Your responses are stored locally on your device only.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-sm text-blue-800">
-            <strong>📋 Assessment Structure</strong>
-            <ul className="mt-2 space-y-1">
-              <li>• <strong>Part 1:</strong> Risk Factors ({riskFactorQuestions.length} questions) — contributes 40% to score</li>
-              <li>• <strong>Part 2:</strong> Symptoms via BSE ({symptomQuestions.length} questions) — contributes 60% to score</li>
-              <li>• Takes approximately 3–5 minutes</li>
-            </ul>
+          {/* Assessment Structure Card */}
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6 shadow-sm">
+            <div className="flex gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Info className="w-5 h-5 text-blue-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900 mb-3">Assessment Structure</h3>
+                <ul className="space-y-2 text-sm text-blue-800">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-0.5">•</span>
+                    <span><strong>Part 1:</strong> Risk Factors ({riskFactorQuestions.length} questions) — contributes 40% to score</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-0.5">•</span>
+                    <span><strong>Part 2:</strong> Symptoms via BSE ({symptomQuestions.length} questions) — contributes 60% to score</span>
+                  </li>
+                </ul>
+                <div className="flex items-center gap-2 mt-4 text-sm text-blue-700">
+                  <Clock className="w-4 h-4" />
+                  <span>Takes approximately 3–5 minutes</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer mb-6">
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="mt-1 w-5 h-5 accent-pink-600"
-            />
-            <span className="text-sm text-gray-700">
-              I understand that this is an awareness tool only and does not provide a medical diagnosis.
-              I consent to proceeding with the self-assessment.
-            </span>
-          </label>
+          {/* Consent Checkbox Card */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6 shadow-sm">
+            <label className="flex items-start gap-4 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className="mt-1 w-5 h-5 accent-pink-600 flex-shrink-0"
+              />
+              <span className="text-sm text-gray-700 leading-relaxed">
+                I understand that this is an awareness tool only and does not provide a medical diagnosis.
+                I consent to proceeding with the self-assessment.
+              </span>
+            </label>
+          </div>
 
-          <button
-            onClick={() => setPhase('risk_factors')}
-            disabled={!consent}
-            className="w-full bg-pink-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-pink-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            Begin Assessment
-          </button>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => setPhase('risk_factors')}
+              disabled={!consent}
+              className="flex-1 bg-gray-900 text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md disabled:shadow-none"
+            >
+              Begin Assessment
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="sm:w-32 bg-white text-gray-700 py-4 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors border border-gray-200"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -165,7 +236,9 @@ export default function AssessmentPage() {
   if (phase === 'calculating') {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
-        <div className="text-5xl mb-6 animate-pulse">🔬</div>
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-pink-100 flex items-center justify-center">
+          <ClipboardCheck className="w-8 h-8 text-pink-600 animate-pulse" />
+        </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Calculating Your Risk Score...</h2>
         <p className="text-gray-500">Analyzing your responses with our rule-based scoring engine.</p>
         <div className="mt-8 w-48 h-2 bg-pink-100 rounded-full mx-auto overflow-hidden">

@@ -17,7 +17,7 @@ export default function ResultsPage() {
   if (!result) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
-        <div className="text-5xl mb-4">📋</div>
+        <div className="text-5xl mb-4"></div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">No Assessment Found</h2>
         <p className="text-gray-500 mb-6">Please complete the self-assessment first.</p>
         <Link href="/assessment" className="bg-pink-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-pink-700 transition-colors">
@@ -80,7 +80,7 @@ export default function ResultsPage() {
 
       {/* Explanations */}
       <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-8 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">📊 Score Explanation</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4"> Score Explanation</h2>
         <div className="space-y-2">
           {result.explanations.map((exp, i) => (
             <div key={i} className="flex gap-2 items-start">
@@ -93,7 +93,7 @@ export default function ResultsPage() {
 
       {/* Recommendations */}
       <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-8 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">✅ Recommended Next Steps</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4"> Recommended Next Steps</h2>
         <div className="space-y-3">
           {result.recommendations.map((rec, i) => (
             <div key={i} className="flex gap-3 items-start bg-pink-50/50 rounded-xl p-3">
@@ -109,13 +109,13 @@ export default function ResultsPage() {
       {/* CTAs */}
       <div className="grid sm:grid-cols-3 gap-4">
         <Link href="/appointments" className="block text-center bg-pink-600 text-white py-3 rounded-xl font-medium hover:bg-pink-700 transition-colors">
-          📅 Book Appointment
+           Book Appointment
         </Link>
         <Link href="/chat" className="block text-center bg-white text-pink-600 border-2 border-pink-200 py-3 rounded-xl font-medium hover:bg-pink-50 transition-colors">
-          💬 Talk to Support
+           Talk to Support
         </Link>
         <Link href="/assessment" className="block text-center bg-white text-gray-600 border-2 border-gray-200 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors">
-          🔄 Retake Assessment
+          Retake Assessment
         </Link>
       </div>
     </div>
