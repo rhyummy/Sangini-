@@ -19,9 +19,9 @@ const demoAppointments: Appointment[] = [
 ];
 
 const doctors = [
-  { id: "dr-sharma", name: "Dr. Sharma" },
-  { id: "dr-mehta", name: "Dr. Mehta" },
-  { id: "dr-patel", name: "Dr. Patel" },
+  { id: "00000000-0000-0000-0000-000000000001", name: "Dr. Sharma" },
+  { id: "00000000-0000-0000-0000-000000000002", name: "Dr. Mehta" },
+  { id: "00000000-0000-0000-0000-000000000003", name: "Dr. Patel" },
 ];
 
 const timeSlots = [
@@ -115,7 +115,6 @@ export default function AppointmentsPage() {
           doctor_id: selectedDoctor,
           appointment_date: appointmentDate.toISOString(),
           status: "pending",
-          reason: notes || "Consultation",
         });
 
       if (insertErr) throw insertErr;
@@ -322,9 +321,9 @@ export default function AppointmentsPage() {
                       {doctors.map((doc) => (
                         <button
                           key={doc.id}
-                          onClick={() => setSelectedDoctor(doc.name)}
+                          onClick={() => setSelectedDoctor(doc.id)}
                           className={`w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
-                            selectedDoctor === doc.name
+                            selectedDoctor === doc.id
                               ? "bg-pink-600 text-white border-pink-600 shadow-md shadow-pink-200/50"
                               : "bg-white text-gray-700 border-pink-100 hover:border-pink-300 hover:bg-pink-50"
                           }`}
